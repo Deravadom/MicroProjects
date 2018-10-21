@@ -1,36 +1,6 @@
 import sys
 import turtle
 
-def border(t, screen_x, screen_y):
-	
-	"""Draws a border around the canvas in red."""
-	t.penup()
-	t.home()
-
-	#Move to lower left, turtle faces west
-	t.forward(screen_x/2)
-	t.right(90)
-	t.forward(screen_y/2)
-	t.setheading(180)
-
-	t.pencolor('red')
-	t.pendown()
-	t.pensize(10)
-	for distance in (screen_x, screen_y, screen_x, screen_y):
-		t.forward(distance)
-		t.right(90)
-
-	#Raise pen and move home
-	t.penup()
-	t.home()
-
-def square(t, size, color):
-	#Draw a square of given color, size
-	t.pencolor(color)
-	t.pendown()
-	for i in range(4):
-		t.forward(size)
-		t.right(90)
 def step(turns):
 	result = turns.copy()
 	result.append(1)
@@ -40,51 +10,70 @@ def step(turns):
 		result.append(turn * -1)
 	return result
 
-def turnMove(t, turn):
+def turnMove(t, turn, walk):
 	if turn == 1:
 		t.right(90)
 	else:
 		t.left(90)
-	t.forward(1)
+	t.forward(walk)
 
-def main():
-	#Create screen and turtle
-	screen = turtle.Screen()
-	screen.title('Square Demo')
-	screen_x, screen_y = screen.screensize()
-	t = turtle.Turtle()
+def parseArgs(argc, argv):
+	dArgs = [4, 10, 3]
 
-	t.speed(0)
+	for i in range(1, argc):
+		dArgs[i-1] = argv[i]
 
-	#border(t, screen_x, screen_y)
+	return dArgs
 
-	colors = ['red', 'orange', 'yellow', 'green', 'blue', 'violet']
-	"""
-	t.pensize(3)
-	#for i, color in enumerate(colors):
-		square(t, (screen_y / 2) / 10 * (i + 1), color)
-	turtle.write("this is a test", True, align="center", font=('Arial', 32, 'normal'))
-	"""
+def reset(t, offset):
+	x, y = offset
+	t.penup()
+	t.setpos(x, y)
+	t.pendown()
 
+def dragonCurve(t, dArgs):
 	turns = [1]
 
-	t.pensize(3)
+	folds = int(dArgs[0])
+	walk = int(dArgs[1])
+	pensize = int(dArgs[2])
+
+	offset = (0, folds * walk)
+	t.penup()
+
+	t.pensize(pensize)
 	t.pendown()
-	t.pencolor('red')
-	t.forward(1)
 
-
-	for i in range(0, 25):
-		t.penup()
-		t.home()
-		t.pendown()
+	colors = ['red', 'blue', 'green', 'purple']
+	
+	for i in range(0, folds):
 		turns = step(turns)
-		print("Calculated: ", i)
-		if i > 23:
-			for turn in turns:
-				turnMove(t, turn)
 
+		reset(t, offset)
+		t.setheading(90 * (i%4))
+	
+		t.color(colors[i%4])
+		t.forward(walk)
 
+	
+		for turn in turns:
+			turnMove(t, turn, walk)
+	
+
+def main():
+	argc = len(sys.argv)
+	argv = sys.argv
+
+	#Create screen and turtle
+	screen = turtle.Screen()
+	screen.title('Dragon Curve Demo')
+
+	t = turtle.Turtle()
+	t.speed(0)
+
+	dragonCurve(t, parseArgs(argc, argv))
+
+	t.hideturtle()
 	print("Hit any key to exit")
 	dummy=input()
 
